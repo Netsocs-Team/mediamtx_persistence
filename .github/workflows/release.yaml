@@ -18,7 +18,7 @@ jobs:
               with:
                   go-version: "1.24"
             - name: Build
-              run: go build -o mediamtx_persistence
+              run: go build -ldflags "-X main.version=${GITHUB_SHA}" -o mediamtx_persistence
             - name: Create Release
               uses: ncipollo/release-action@v1
               with:
