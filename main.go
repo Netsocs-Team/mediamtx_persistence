@@ -16,6 +16,7 @@ const MEDIAMTX_YAML_PATH = "./mediamtx.yml"
 func main() {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 	mediamtx := flag.String("mediamtx", "http://localhost:9997", "Mediamtx Server")
+	configPath := flag.String("config", MEDIAMTX_YAML_PATH, "Mediamtx Server Config")
 	flag.Parse()
 
 	if *mediamtx == "" {
@@ -31,7 +32,7 @@ func main() {
 			logger.Println("Error persisting config", zap.Error(err))
 			continue
 		}
-		currentConfig, err := LoadYamlConfig(MEDIAMTX_YAML_PATH)
+		currentConfig, err := LoadYamlConfig(*configPath)
 		if err != nil {
 			logger.Println("Error loading current config", zap.Error(err))
 			continue
@@ -40,7 +41,7 @@ func main() {
 		if !reflect.DeepEqual(config, currentConfig) {
 			logger.Println("Config changed, updating")
 			logDiffs(logger, config, currentConfig)
-			UpdateConfig(MEDIAMTX_YAML_PATH, config)
+			UpdateConfig(*configPath, config)
 		}
 	}
 }

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Run mediamtx_persistence in the background
+echo "Running mediamtx_persistence in the background..."
+./persistence
+
+# Run mediamtx
+echo "Running mediamtx..."
+./persistence --config=/app/mediamtx.yml
+
+/mediamtx /app/mediamtx.yml
