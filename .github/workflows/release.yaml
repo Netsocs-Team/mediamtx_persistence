@@ -8,16 +8,15 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                go-version: ["1.24"]
+        permissions:
+            contents: write
 
         steps:
             - uses: actions/checkout@v4
-            - name: Setup Go ${{ matrix.go-version }}
+            - name: Setup Go 1.24
               uses: actions/setup-go@v5
               with:
-                  go-version: ${{ matrix.go-version }}
+                  go-version: "1.24"
             - name: Build
               run: go build -o mediamtx_persistence
             - name: Create Release
