@@ -7,29 +7,24 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func LoadYamlConfig(configpath string) (string, error) {
+func LoadYamlConfig(configpath string) (*Config, error) {
 
 	f, err := os.Open(configpath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer f.Close()
 
-	tmp := map[string]interface{}{}
+	var result *Config
 
 	content, err := io.ReadAll(f)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	err = yaml.Unmarshal(content, &tmp)
+	err = yaml.Unmarshal(content, &result)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	result, err := yaml.Marshal(tmp)
-	if err != nil {
-		return "", err
-	}
-
-	return string(result), nil
+	return result, nil
 }

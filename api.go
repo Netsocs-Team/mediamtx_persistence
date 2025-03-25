@@ -7,19 +7,24 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func GetBaseConfig(mediamtxAPI string, user string, pass string) (string, error) {
+func GetBaseConfig(mediamtxAPI string, user string, pass string) (*Config, error) {
 	resp, err := resty.New().R().
 		SetBasicAuth(user, pass).
 		Get(fmt.Sprintf("%s/v3/config/global/get", mediamtxAPI))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(resp.Body()), nil
+	result := Config{}
+	err = json.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
-func GetGlobalPaths(mediamtxAPI string, user string, pass string) ([]string, error) {
+func GetGlobalPaths(mediamtxAPI string, user string, pass string) ([]Path, error) {
 	client := resty.New()
-	var paths []string
+	var paths []Path
 	total := 0
 	page := -1
 
@@ -44,7 +49,7 @@ func GetGlobalPaths(mediamtxAPI string, user string, pass string) ([]string, err
 
 		total = pathResponse.ItemCount
 
-		paths = append(paths, pathItemsToString(pathResponse.Items)...)
+		paths = append(paths, pathResponse.Items...)
 
 		if total <= page*1000 {
 			break
@@ -52,13 +57,4 @@ func GetGlobalPaths(mediamtxAPI string, user string, pass string) ([]string, err
 	}
 
 	return paths, nil
-}
-
-func pathItemsToString(items []PathResponseItem) []string {
-	var paths []string
-	// make json
-	for _, item := range items {
-		paths = append(paths, fmt.Sprintf(`{"name": "%s","source": "%s","sourceOnDemand": %t}`, item.Name, item.Source, item.SourceOnDemand))
-	}
-	return paths
 }

@@ -1,40 +1,21 @@
 package main
 
-import (
-	"encoding/json"
-
-	"github.com/valyala/fastjson"
-)
-
-func Persist(mediamtxAPI string) (string, error) {
+func Persist(mediamtxAPI string) (*Config, error) {
 	paths, err := GetGlobalPaths(mediamtxAPI, "admin", "admin")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	base, err := GetBaseConfig(mediamtxAPI, "admin", "admin")
+	config, err := GetBaseConfig(mediamtxAPI, "admin", "admin")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	baseConfig, err := fastjson.Parse(base)
-	if err != nil {
-		return "", err
-	}
-	pathsAsJson, err := json.Marshal(paths)
-	if err != nil {
-		return "", err
-	}
-	pathsConfig, err := fastjson.ParseBytes(pathsAsJson)
-	if err != nil {
-		return "", err
-	}
-	baseConfig.Set("paths", pathsConfig)
+	config.Paths = make(map[string]Path)
 
-	configAsJson := baseConfig.MarshalTo(nil)
-	config, err := JSONToYAML(string(configAsJson))
-	if err != nil {
-		return "", err
+	for _, path := range paths {
+		config.Paths[path.Name] = path
 	}
+
 	return config, nil
 }
