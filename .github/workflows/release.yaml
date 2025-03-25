@@ -5,11 +5,16 @@ on:
         branches:
             - main
 
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: mediamtx_with_persistence
+
 jobs:
     build:
         runs-on: ubuntu-latest
         permissions:
-            contents: write
+            contents: read
+            packages: write
 
         steps:
             - uses: actions/checkout@v4
@@ -24,3 +29,19 @@ jobs:
               with:
                   artifacts: "mediamtx_persistence"
                   tag: v1.1.0
+            - name: Log in to GHCR
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Docker Build and Push
+              uses: docker/build-push-action@v6
+              with:
+                  platforms: linux/amd64
+                  provenance: false
+                  push: true
+                  tags: |
+                      ${{ env.REGISTRY }}/netsocs-team/${{ env.IMAGE_NAME }}/main:latest
+                      ${{ env.REGISTRY }}/netsocs-team/${{ env.IMAGE_NAME }}/main:${{ github.sha }}

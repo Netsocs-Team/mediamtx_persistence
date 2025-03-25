@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
-	"os"
 	"reflect"
 	"time"
 
@@ -14,7 +12,7 @@ const MEDIAMTX_YAML_PATH = "./mediamtx.yml"
 
 // inspired by https://github.com/dfpc-coe/media-infra/blob/main/persist.ts
 func main() {
-	logger := log.New(os.Stderr, "", log.LstdFlags)
+	logger, _ := zap.NewDevelopment()
 	mediamtx := flag.String("mediamtx", "http://localhost:9997", "Mediamtx Server")
 	configPath := flag.String("config", MEDIAMTX_YAML_PATH, "Mediamtx Server Config")
 	flag.Parse()
@@ -29,24 +27,24 @@ func main() {
 	for range ticker.C {
 		config, err := Persist(*mediamtx)
 		if err != nil {
-			logger.Println("Error persisting config", zap.Error(err))
+			logger.Error("Error persisting config", zap.Error(err))
 			continue
 		}
 		currentConfig, err := LoadYamlConfig(*configPath)
 		if err != nil {
-			logger.Println("Error loading current config", zap.Error(err))
+			logger.Error("Error loading current config", zap.Error(err))
 			continue
 		}
 
 		if !reflect.DeepEqual(config, currentConfig) {
-			logger.Println("Config changed, updating")
+			logger.Error("Config changed, updating")
 			logDiffs(logger, config, currentConfig)
 			UpdateConfig(*configPath, config)
 		}
 	}
 }
 
-func logDiffs(logger *log.Logger, config, currentConfig *Config) {
+func logDiffs(logger *zap.Logger, config, currentConfig *Config) {
 	v1 := reflect.ValueOf(*config)
 	v2 := reflect.ValueOf(*currentConfig)
 	typeOfConfig := v1.Type()
@@ -57,7 +55,7 @@ func logDiffs(logger *log.Logger, config, currentConfig *Config) {
 		value2 := v2.Field(i).Interface()
 
 		if !reflect.DeepEqual(value1, value2) {
-			logger.Println("Field changed", zap.String("field", fieldName), zap.Any("old", value2), zap.Any("new", value1))
+			logger.Info("Field changed", zap.String("field", fieldName), zap.Any("old", value2), zap.Any("new", value1))
 		}
 	}
 }

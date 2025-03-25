@@ -2,9 +2,6 @@ FROM golang:alpine
 
 WORKDIR /app
 
-ARG VERSION=0.0.0
-
-
 COPY go.mod go.sum ./
 
 RUN go mod download
@@ -15,15 +12,17 @@ RUN go build -o persistence .
 
 FROM bluenviron/mediamtx:latest-ffmpeg
 
-WORKDIR /app
 
-COPY start ./start
-RUN chmod +x ./start
+RUN mkdir -p /opt/startup
 
-COPY --from=0 /app/persistence ./
-RUN chmod +x ./persistence
+COPY start /start
+RUN chmod +x /start
+
+COPY --from=0 /app/persistence /opt/startup/persistence
+RUN chmod +x /opt/startup/persistence
+
+COPY mediamtx.yaml /opt/startup/mediamtx.yaml
+RUN chmod +x /opt/startup/mediamtx.yaml
 
 
-EXPOSE 8080
-
-CMD ["./start"]
+ENTRYPOINT [ "/start" ]

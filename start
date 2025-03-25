@@ -2,10 +2,9 @@
 
 # Run mediamtx_persistence in the background
 echo "Running mediamtx_persistence in the background..."
-./persistence
+echo "The logs are available at /opt/startup/persistence.log"
+/opt/startup/persistence --config=/opt/startup/mediamtx.yaml > /opt/startup/persistence.log 2>&1 &
 
 # Run mediamtx
 echo "Running mediamtx..."
-./persistence --config=/app/mediamtx.yml
-
-/mediamtx /app/mediamtx.yml
+/mediamtx /opt/startup/mediamtx.yaml
