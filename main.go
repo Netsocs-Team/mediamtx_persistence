@@ -25,7 +25,7 @@ func main() {
 
 	ticker := time.NewTicker(10 * time.Second)
 
-	for {
+	for range ticker.C {
 		config, err := Persist(*mediamtx)
 		if err != nil {
 			logger.Println("Error persisting config", zap.Error(err))
@@ -42,7 +42,6 @@ func main() {
 			logDiffs(logger, config, currentConfig)
 			UpdateConfig(MEDIAMTX_YAML_PATH, config)
 		}
-		<-ticker.C
 	}
 }
 
