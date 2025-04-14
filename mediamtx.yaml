@@ -20,3 +20,6 @@ authInternalUsers:
         path:
       - action: playback
         path:
+
+pathDefaults:
+  sourceOnDemand: yes
