@@ -37,9 +37,6 @@ func main() {
 			continue
 		}
 
-		logger.Debug("Current config", zap.Any("config", currentConfig))
-		logger.Debug("New config", zap.Any("config", config))
-
 		if !reflect.DeepEqual(config, currentConfig) {
 			logger.Info("Config changed, updating")
 			logDiffs(logger, config, currentConfig)
