@@ -37,11 +37,13 @@ func main() {
 		}
 
 		if !reflect.DeepEqual(config, currentConfig) {
-			logger.Error("Config changed, updating")
+			logger.Info("Config changed, updating")
 			logDiffs(logger, config, currentConfig)
 			UpdateConfig(*configPath, config)
+			logger.Info("Config updated")
 		}
 	}
+	logger.Warn("Ticker stopped - exiting...")
 }
 
 func logDiffs(logger *zap.Logger, config, currentConfig *Config) {
