@@ -25,6 +25,7 @@ func main() {
 	ticker := time.NewTicker(10 * time.Second)
 
 	for range ticker.C {
+		logger.Info("Checking for config changes")
 		config, err := Persist(*mediamtx)
 		if err != nil {
 			logger.Error("Error persisting config", zap.Error(err))
@@ -41,6 +42,8 @@ func main() {
 			logDiffs(logger, config, currentConfig)
 			UpdateConfig(*configPath, config)
 			logger.Info("Config updated")
+		} else {
+			logger.Info("No changes to config")
 		}
 	}
 	logger.Warn("Ticker stopped - exiting...")
