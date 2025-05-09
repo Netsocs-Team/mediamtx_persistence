@@ -12,8 +12,9 @@ const MEDIAMTX_YAML_PATH = "./mediamtx.yml"
 
 // inspired by https://github.com/dfpc-coe/media-infra/blob/main/persist.ts
 func main() {
+	version := "2.0.0"
 	logger, _ := zap.NewDevelopment()
-	mediamtx := flag.String("mediamtx", "https://10.147.17.223/api/netsocs/dh/video-engine/netsocs_native.video_engine.default/api_port", "Mediamtx Server")
+	mediamtx := flag.String("mediamtx", "http://localhost:9997", "Mediamtx Server")
 	configPath := flag.String("config", MEDIAMTX_YAML_PATH, "Mediamtx Server Config")
 	flag.Parse()
 
@@ -22,7 +23,8 @@ func main() {
 		return
 	}
 
-	ticker := time.NewTicker(10 * time.Hour)
+	ticker := time.NewTicker(10 * time.Second)
+	logger.Info("Mediamtx Persistence", zap.String("version", version))
 
 	for range ticker.C {
 		logger.Info("Checking for config changes")
