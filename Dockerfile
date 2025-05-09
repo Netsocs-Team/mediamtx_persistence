@@ -25,4 +25,5 @@ COPY mediamtx.yaml /opt/startup/mediamtx.yaml
 RUN chmod +x /opt/startup/mediamtx.yaml
 
 
+
 ENTRYPOINT [ "/start" ]

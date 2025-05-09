@@ -42,7 +42,11 @@ func main() {
 		if !reflect.DeepEqual(config, currentConfig) {
 			logger.Info("Config changed, updating")
 			logDiffs(logger, config, currentConfig)
-			UpdateConfig(*configPath, config)
+			err = UpdateConfig(*configPath, config)
+			if err != nil {
+				logger.Error("Error updating config", zap.Error(err))
+				continue
+			}
 			logger.Info("Config updated")
 		} else {
 			logger.Info("No changes to config")
