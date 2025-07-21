@@ -14,7 +14,7 @@ func Persist(mediamtxAPI string) (*Config, error) {
 	config.Paths = make(map[string]Path)
 
 	for _, path := range paths {
-		path.SourceOnDemand = true
+		// path.SourceOnDemand = true
 		config.Paths[path.Name] = path
 	}
 
