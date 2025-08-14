@@ -1,13 +1,7 @@
 services:
     mediamtx:
         image: ghcr.io/netsocs-team/mediamtx_with_persistence/main:latest
-
-        ports:
-            - "9997:9997"
-            - "8888:8888"
-            - "8889:8889"
-            - "8189:8189"
-            - "9996:9996"
+        network_mode: host
         volumes:
             - ./recordings:/recordings:rw
             - ./mediamtx:/etc/mediamtx
