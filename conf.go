@@ -4,6 +4,7 @@ type Path struct {
 	Name           string `json:"name" yaml:"name"`
 	Source         string `json:"source" yaml:"source"`
 	SourceOnDemand bool   `json:"sourceOnDemand" yaml:"sourceOnDemand"`
+	Record         bool   `json:"record" yaml:"record"`
 }
 
 type Config struct {
