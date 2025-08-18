@@ -15,6 +15,8 @@ func Persist(mediamtxAPI string) (*Config, error) {
 
 	for _, path := range paths {
 		// path.SourceOnDemand = true
+		path.RecordDeleteAfter = "10m"
+		path.RecordSegmentDuration = "5m"
 		config.Paths[path.Name] = path
 	}
 

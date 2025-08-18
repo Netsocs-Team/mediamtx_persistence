@@ -1,10 +1,12 @@
 package main
 
 type Path struct {
-	Name           string `json:"name" yaml:"name"`
-	Source         string `json:"source" yaml:"source"`
-	SourceOnDemand bool   `json:"sourceOnDemand" yaml:"sourceOnDemand"`
-	Record         bool   `json:"record" yaml:"record"`
+	Name                  string `json:"name" yaml:"name"`
+	Source                string `json:"source" yaml:"source"`
+	SourceOnDemand        bool   `json:"sourceOnDemand" yaml:"sourceOnDemand"`
+	Record                bool   `json:"record" yaml:"record"`
+	RecordDeleteAfter     string `json:"recordDeleteAfter" yaml:"recordDeleteAfter"`
+	RecordSegmentDuration string `json:"recordSegmentDuration" yaml:"recordSegmentDuration"`
 }
 
 type Config struct {
