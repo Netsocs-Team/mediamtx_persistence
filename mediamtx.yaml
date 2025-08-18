@@ -21,5 +21,7 @@ authInternalUsers:
       - action: playback
         path:
 
+recordDeleteAfter: 10m
+recordSegmentDuration: 5m
 pathDefaults:
   sourceOnDemand: yes
