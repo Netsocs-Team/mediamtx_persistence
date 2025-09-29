@@ -1,0 +1,89 @@
+name: Build and Package Driver
+
+on:
+    push:
+        branches:
+            - main
+            - engine_as_driver
+    pull_request:
+
+jobs:
+    build-and-package-driver:
+        runs-on: ubuntu-22.04
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                  go-version: '1.24.x'
+
+            - name: Build persistence binary
+              run: |
+                  go env -w CGO_ENABLED=0
+                  go version
+                  # Build main package into ./persistence
+                  go build -trimpath -ldflags "-s -w" -o persistence .
+                  file persistence
+
+            - name: Download latest MediaMTX release (linux amd64)
+              env:
+                  GH_API: https://api.github.com/repos/bluenviron/mediamtx/releases/latest
+              run: |
+                  set -euo pipefail
+                  curl -sSL "$GH_API" > latest.json
+                  # Try common asset name patterns
+                  URL=$(cat latest.json | grep -oE 'https://[^"]+linux_amd64[^\"]+\.tar\.gz' | head -n1 || true)
+                  if [ -z "$URL" ]; then
+                    URL=$(cat latest.json | grep -oE 'https://[^"]+linux-x86_64[^\"]+\.tar\.gz' | head -n1 || true)
+                  fi
+                  if [ -z "$URL" ]; then
+                    echo "Could not determine MediaMTX linux amd64 asset URL" >&2
+                    exit 1
+                  fi
+                  echo "Downloading: $URL"
+                  curl -fL "$URL" -o mediamtx.tar.gz
+                  mkdir -p mediamtx_dist
+                  tar -xzf mediamtx.tar.gz -C mediamtx_dist
+                  # Find the mediamtx binary inside extracted folder
+                  MEDIAMTX_BIN=$(find mediamtx_dist -type f -name mediamtx -perm -111 | head -n1)
+                  if [ -z "$MEDIAMTX_BIN" ]; then
+                    echo "mediamtx binary not found after extraction" >&2
+                    find mediamtx_dist -maxdepth 3 -type f -printf '%p\n'
+                    exit 1
+                  fi
+                  mkdir -p bin
+                  cp "$MEDIAMTX_BIN" ./bin/mediamtx
+                  chmod +x ./bin/mediamtx
+                  ./bin/mediamtx --version || true
+
+            - name: Prepare package contents
+              run: |
+                  mkdir -p recordings
+                  mkdir -p mediamtx
+                  # Optionally include a placeholder .gitkeep so empty dirs are zipped
+                  touch recordings/.gitkeep
+                  touch mediamtx/.gitkeep
+
+            - name: Create zip package
+              run: |
+                  PACKAGE_NAME=mediamtx_with_persistence.zip
+                  rm -f "$PACKAGE_NAME"
+                  zip -r "$PACKAGE_NAME" persistence bin/mediamtx recordings mediamtx
+                  ls -lah "$PACKAGE_NAME"
+                  echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+
+            - name: Upload to S3
+              uses: hkusu/s3-upload-action@v2
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-bucket: ${{ secrets.AWS_DRIVER_BUCKET }}
+                  aws-region: us-east-1
+                  file-path: ${{ env.PACKAGE_NAME }}
+                  destination-dir: /
+                  bucket-root: /
+
+
