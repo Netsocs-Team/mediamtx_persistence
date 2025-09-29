@@ -28,34 +28,13 @@ jobs:
                   go build -trimpath -ldflags "-s -w" -o persistence .
                   file persistence
 
-            - name: Download latest MediaMTX release (linux amd64)
-              env:
-                  GH_API: https://api.github.com/repos/bluenviron/mediamtx/releases/latest
+            - name: Download MediaMTX binary from S3 (linux amd64)
               run: |
                   set -euo pipefail
-                  curl -sSL "$GH_API" > latest.json
-                  # Try common asset name patterns
-                  URL=$(cat latest.json | grep -oE 'https://[^"]+linux_amd64[^\"]+\.tar\.gz' | head -n1 || true)
-                  if [ -z "$URL" ]; then
-                    URL=$(cat latest.json | grep -oE 'https://[^"]+linux-x86_64[^\"]+\.tar\.gz' | head -n1 || true)
-                  fi
-                  if [ -z "$URL" ]; then
-                    echo "Could not determine MediaMTX linux amd64 asset URL" >&2
-                    exit 1
-                  fi
-                  echo "Downloading: $URL"
-                  curl -fL "$URL" -o mediamtx.tar.gz
-                  mkdir -p mediamtx_dist
-                  tar -xzf mediamtx.tar.gz -C mediamtx_dist
-                  # Find the mediamtx binary inside extracted folder
-                  MEDIAMTX_BIN=$(find mediamtx_dist -type f -name mediamtx -perm -111 | head -n1)
-                  if [ -z "$MEDIAMTX_BIN" ]; then
-                    echo "mediamtx binary not found after extraction" >&2
-                    find mediamtx_dist -maxdepth 3 -type f -printf '%p\n'
-                    exit 1
-                  fi
+                  URL="https://netsocs-public-drivers-repository.s3.us-east-1.amazonaws.com/video_engine_mediamtx/mediamtx"
+                  echo "Downloading MediaMTX from: $URL"
                   mkdir -p bin
-                  cp "$MEDIAMTX_BIN" ./bin/mediamtx
+                  curl -fL "$URL" -o ./bin/mediamtx
                   chmod +x ./bin/mediamtx
                   ./bin/mediamtx --version || true
 
