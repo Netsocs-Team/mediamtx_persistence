@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/exec"
 	"reflect"
 	"time"
 
+	"github.com/Netsocs-Team/driver.sdk_go/pkg/client"
 	"go.uber.org/zap"
 )
 
@@ -12,7 +15,7 @@ const MEDIAMTX_YAML_PATH = "./mediamtx.yml"
 
 // inspired by https://github.com/dfpc-coe/media-infra/blob/main/persist.ts
 func main() {
-	version := "2.0.0"
+
 	logger, _ := zap.NewDevelopment()
 	mediamtx := flag.String("mediamtx", "http://localhost:9997", "Mediamtx Server")
 	configPath := flag.String("config", MEDIAMTX_YAML_PATH, "Mediamtx Server Config")
@@ -23,8 +26,44 @@ func main() {
 		return
 	}
 
+	cmd := exec.Command("./mediamtx")
+	// Optionally, redirect output to logger or os.Stdout/os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Start()
+	if err != nil {
+		logger.Fatal("Failed to start mediamtx binary", zap.Error(err))
+		return
+	}
+	logger.Info("Started mediamtx binary", zap.Int("pid", cmd.Process.Pid))
+
+	// Monitor the process in a goroutine
+	go func() {
+		err := cmd.Wait()
+		if err != nil {
+			logger.Fatal("mediamtx process exited with error", zap.Error(err))
+		} else {
+			logger.Fatal("mediamtx process exited, terminating persistence process")
+		}
+	}()
+
+	go monitorConfig(logger, configPath, mediamtx)
+	time.Sleep(30 * time.Second)
+	cmd.Process.Kill()
+
+	nc, err := client.New()
+
+	if err != nil {
+		logger.Fatal("Error creating client", zap.Error(err))
+		return
+	}
+
+	nc.ListenConfig()
+}
+
+func monitorConfig(logger *zap.Logger, configPath *string, mediamtx *string) {
 	ticker := time.NewTicker(10 * time.Second)
-	logger.Info("Mediamtx Persistence", zap.String("version", version))
 
 	for range ticker.C {
 		logger.Info("Checking for config changes")
@@ -70,3 +109,5 @@ func logDiffs(logger *zap.Logger, config, currentConfig *Config) {
 		}
 	}
 }
+
+//"4R/lZYuZ5JprR+TIdl0+Zf8nM+DyNwlm8KdSVemumZ5NjYKA1ihMFmfOqJlLE5lMtokPjBvKPj7QAh/qnEuyvxPoVztfjpMxe17JinRm/T08inFOQfyGJGPu2LPM7lceAIgZ60Iqh98M22DgjERaQMdOlU0k3f8MRgVYhYnyIAYPh35pZq6SVjsl07La3qVLB4m9Vh9mFNPwYvan5IueaXWxLCVPxSJ80/KMTcSsCoUaMJhYtcsRPU3ZyCYySCrfdK/FQqK7VRy0V7S+Hk5Lgs0jEJObEnUEsiDndqI/JG8yl5Gm45oQD/0BZTWOEtZL+yXTKXEvqi6W9X9svg/eRi1+xB2bvbQQfQQQVdaN0wBJZSte4r7Lnf+fJKTFotynn/mj1nNVoBWJmmZuE1g5CJtYOf2dH4+ga+GWmH8ParGrFgGok9PfnUtpYQgNzIksZDYLb53O57XVuXMZRXZoF13OrZvVMHS+kwaVSFy0o1QHnwdJSJ3hNMtidUoVw5aWngOt+8TWOl1s/Ev0NCcWnVBO5jAKVlkrzuS8cKkqH4XxQx+zerlpvL9MaFOfiBJsAkhcMULjjrl9naH+t2ViOfr/m2ei2xE5PTBN9G3WSMB4ctVzVRf4gkXq9pbHeCQtUV9b+rhm2KZ7ZJ9O0w8aPzRoQnNHciwRo018T6gDzGvenaIbyG0cU94ryw6o+b8vgjDqV5dg0ovbDJCgtqt+NMHdXl/Rrb/xddXNL8pn6W3FLyHAVHeO5Fi8mCx7ZQM5DzIQZJK+4OgJEJmY9ukl/x8pMp+rkq7gkXqNHOQxtsICWcVZeBcINqRI9JcvYsoDsWD+iLZvoksSZGpe66RiZeYfmC4J1hXaqwk6g3Xzi1aWOSb2GhTIuOmvCXEp9fg5scQf96Bek9Lg7/bHYylhwVILB+nZaftTwK9AB9ywwNIMYm1kk4QulFfxLT/bhioTRqw2FJW0fe1DMmEaQBw="
