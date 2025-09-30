@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/Netsocs-Team/driver.sdk_go v0.7.35-0.20250930154657-554fc471b9c6
+	github.com/Netsocs-Team/driver.sdk_go v0.7.35-0.20250930210617-168b1f5db74b
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect

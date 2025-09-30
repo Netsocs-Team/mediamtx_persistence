@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/exec"
 	"reflect"
 	"time"
 
 	"github.com/Netsocs-Team/driver.sdk_go/pkg/client"
+	"github.com/Netsocs-Team/driver.sdk_go/pkg/objects"
 	"go.uber.org/zap"
 )
 
@@ -26,6 +28,9 @@ func main() {
 		return
 	}
 
+	ports := []int{9996, 9997, 9998, 9999}
+	KillPorts(ports)
+
 	cmd := exec.Command("./mediamtx")
 	// Optionally, redirect output to logger or os.Stdout/os.Stderr
 	cmd.Stdout = os.Stdout
@@ -42,15 +47,17 @@ func main() {
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
+			cmd.Process.Kill()
 			logger.Fatal("mediamtx process exited with error", zap.Error(err))
+
 		} else {
+			cmd.Process.Kill()
 			logger.Fatal("mediamtx process exited, terminating persistence process")
+
 		}
 	}()
 
 	go monitorConfig(logger, configPath, mediamtx)
-	time.Sleep(30 * time.Second)
-	cmd.Process.Kill()
 
 	nc, err := client.New()
 
@@ -58,8 +65,56 @@ func main() {
 		logger.Fatal("Error creating client", zap.Error(err))
 		return
 	}
+	obj, err := CreateObjects(nc)
+
+	if err != nil {
+		cmd.Process.Kill()
+		logger.Fatal("Error creating object", zap.Error(err))
+	}
+
+	logger.Info("Created object", zap.String("object_id", obj.GetMetadata().ObjectID))
 
 	nc.ListenConfig()
+	cmd.Process.Kill()
+}
+
+func CreateObjects(nc *client.NetsocsDriverClient) (objects.RegistrableObject, error) {
+	videoEngineParams := objects.NewVideoEngineObjectParams{}
+	hostname := nc.GetSiteHost()
+	siteid := nc.GetSiteID()
+	videoEngineParams.Metadata.Name = "VideoEngine"
+	videoEngineParams.Metadata.DeviceID = "1"
+	videoEngineParams.Metadata.Domain = "Video_engine"
+	videoEngineParams.Metadata.ObjectID = "netsocs.video_engine.site_" + siteid
+	videoEngineParams.Setup = func(obj objects.VideoEngineObject, oc objects.ObjectController) error {
+		err := obj.UpdateStateAttributes(map[string]string{
+			"state":         "running",
+			"api_port":      "9997",
+			"hls_port":      "3889",
+			"hostname":      hostname,
+			"playback_port": "9996",
+			"rtsp_port":     "8554",
+			"site_id":       siteid,
+			"webrtc_port":   "8889",
+		})
+
+		return err
+	}
+
+	videoEngine := objects.NewVideoEngineObject(videoEngineParams)
+	return videoEngine, nc.RegisterObject(videoEngine)
+}
+
+func KillPorts(ports []int) {
+	for _, port := range ports {
+		cmd := exec.Command("fuser", "-k", fmt.Sprintf("%d/tcp", port))
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Printf("Error killing port %d: %v\nOutput: %s\n", port, err, output)
+		} else {
+			fmt.Printf("Successfully killed process on port %d\n", port)
+		}
+	}
 }
 
 func monitorConfig(logger *zap.Logger, configPath *string, mediamtx *string) {

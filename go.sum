@@ -1,5 +1,5 @@
-github.com/Netsocs-Team/driver.sdk_go v0.7.35-0.20250930154657-554fc471b9c6 h1:S2vef3khCNV77ApWBw7H0DDKdDOKmiZydHYqsYsBMuU=
-github.com/Netsocs-Team/driver.sdk_go v0.7.35-0.20250930154657-554fc471b9c6/go.mod h1:6lmIUxWignd+SWLA+roiQguGQqQwxb7Dwtg6ZxR2PEM=
+github.com/Netsocs-Team/driver.sdk_go v0.7.35-0.20250930210617-168b1f5db74b h1:Zjm1uBii2PJHmGXLg6zTe9e+Lp2LVaYLshlMyC9qyQI=
+github.com/Netsocs-Team/driver.sdk_go v0.7.35-0.20250930210617-168b1f5db74b/go.mod h1:6lmIUxWignd+SWLA+roiQguGQqQwxb7Dwtg6ZxR2PEM=
 github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef h1:2JGTg6JapxP9/R33ZaagQtAM4EkkSYnIAlOG5EI8gkM=
 github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef/go.mod h1:JS7hed4L1fj0hXcyEejnW57/7LCetXggd+vwrRnYeII=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
