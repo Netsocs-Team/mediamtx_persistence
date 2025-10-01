@@ -20,7 +20,7 @@ done
 # Build persistence binary (static-ish)
 echo "Building persistence binary..."
 export CGO_ENABLED=0
-go build -trimpath -ldflags "-s -w" -o persistence .
+go build -trimpath -ldflags "-s -w" 
 
 # Fetch MediaMTX binary
 echo "Downloading MediaMTX binary..."
@@ -32,41 +32,11 @@ chmod +x ./mediamtx
 echo "Preparing directories..."
 mkdir -p recordings
 touch recordings/.gitkeep
-mkdir -p config
-
-
-# Create launcher script
-echo "Creating launcher script..."
-cat > run_mediamtx.sh << 'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Default paths
-MEDIAMTX_BINARY=${MEDIAMTX_BINARY:-./mediamtx}
-CONFIG_PATH=${CONFIG_PATH:-./config/mediamtx.yaml}
-API_URL=${API_URL:-http://localhost:9997}
-
-# Ensure directories exist
-mkdir -p recordings
-mkdir -p config
-
-echo "Starting MediaMTX with persistence..."
-echo "Binary: $MEDIAMTX_BINARY"
-echo "Config: $CONFIG_PATH"
-echo "API URL: $API_URL"
-
-# Run the persistence binary which will start MediaMTX
-exec ./persistence \
-    --mediamtx-binary="$MEDIAMTX_BINARY" \
-    --config="$CONFIG_PATH" \
-    --mediamtx="$API_URL"
-EOF
-chmod +x run_mediamtx.sh
 
 # Create zip
 echo "Creating zip package '${PACKAGE_NAME}'..."
 rm -f "$PACKAGE_NAME"
-zip -r "$PACKAGE_NAME" persistence mediamtx recordings config run_mediamtx.sh
+zip -r "$PACKAGE_NAME" mediamtx_persistence mediamtx recordings driver.netsocs.json mediamtx.yml
 echo "Done. Wrote $(pwd)/${PACKAGE_NAME}"
 
 

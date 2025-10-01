@@ -110,10 +110,15 @@ func KillPorts(ports []int) {
 		cmd := exec.Command("fuser", "-k", fmt.Sprintf("%d/tcp", port))
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			fmt.Printf("Error killing port %d: %v\nOutput: %s\n", port, err, output)
-		} else {
-			fmt.Printf("Successfully killed process on port %d\n", port)
+			// If no process is found, fuser exits with non-zero and empty output; treat as ok
+			if len(output) == 0 {
+				fmt.Printf("No process found on port %d (nothing to kill)\n", port)
+				continue
+			}
+			fmt.Printf("Warning: failed to kill port %d: %v\nOutput: %s\n", port, err, output)
+			continue
 		}
+		fmt.Printf("Successfully killed process on port %d\n", port)
 	}
 }
 
