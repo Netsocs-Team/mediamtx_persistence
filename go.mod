@@ -1,4 +1,4 @@
-module github.com/galindocode/mediamtx_persistence
+module driver.mediamtx_persistence
 
 go 1.24.1
 

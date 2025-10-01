@@ -123,3 +123,4 @@ webrtcTrackGatherTimeout: 2s
 webrtcSTUNGatherTimeout: 5s
 srt: true
 srtAddress: :8890
+paths: {}

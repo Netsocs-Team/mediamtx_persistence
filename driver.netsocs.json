@@ -5,7 +5,7 @@
     "driver_hub_host": "http://24.126.101.169:8080/api/netsocs/dh",
     "version": "2.0.0",
     "name": "Video Engine MediaMTX",
-    "driver_binary_filename": "mediamtx_persistence",
+    "driver_binary_filename": "driver.mediamtx_persistence",
     "cluster_mode": false,
     "settings_available": [],
     "log_level": "debug -> for dev; info -> for prod",

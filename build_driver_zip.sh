@@ -36,7 +36,7 @@ touch recordings/.gitkeep
 # Create zip
 echo "Creating zip package '${PACKAGE_NAME}'..."
 rm -f "$PACKAGE_NAME"
-zip -r "$PACKAGE_NAME" mediamtx_persistence mediamtx recordings driver.netsocs.json mediamtx.yml
+zip -r "$PACKAGE_NAME" driver.mediamtx_persistence mediamtx recordings driver.netsocs.json mediamtx.yml
 echo "Done. Wrote $(pwd)/${PACKAGE_NAME}"
 
 
