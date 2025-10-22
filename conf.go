@@ -7,6 +7,8 @@ type Path struct {
 	Record                bool   `json:"record" yaml:"record"`
 	RecordDeleteAfter     string `json:"recordDeleteAfter" yaml:"recordDeleteAfter"`
 	RecordSegmentDuration string `json:"recordSegmentDuration" yaml:"recordSegmentDuration"`
+	RunOnDemand           string `json:"runOnDemand" yaml:"runOnDemand"`
+	RunOnDemandRestart    bool   `json:"runOnDemandRestart" yaml:"runOnDemandRestart"`
 }
 
 type Config struct {

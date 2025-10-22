@@ -84,7 +84,7 @@ func CreateObjects(nc *client.NetsocsDriverClient) (objects.RegistrableObject, e
 	siteid := nc.GetSiteID()
 	videoEngineParams.Metadata.Name = "VideoEngine"
 	videoEngineParams.Metadata.DeviceID = "1"
-	videoEngineParams.Metadata.Domain = "Video_engine"
+	videoEngineParams.Metadata.Domain = "netsocs_native.video_engine"
 	videoEngineParams.Metadata.ObjectID = "netsocs.video_engine.site_" + siteid
 	videoEngineParams.Setup = func(obj objects.VideoEngineObject, oc objects.ObjectController) error {
 		err := obj.UpdateStateAttributes(map[string]string{
